@@ -1,0 +1,265 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function groupRef(groupId) {
+      return /databases/$(database)/documents/groups/$(groupId);
+    }
+
+    function memberRef(groupId, uid) {
+      return /databases/$(database)/documents/groups/$(groupId)/members/$(uid);
+    }
+
+    function isMember(groupId) {
+      return signedIn() && exists(memberRef(groupId, request.auth.uid));
+    }
+
+    function isOwner(groupId) {
+      return signedIn()
+        && exists(groupRef(groupId))
+        && get(groupRef(groupId)).data.ownerId == request.auth.uid;
+    }
+
+    function isNonEmptyString(value, maxLength) {
+      return value is string && value.size() > 0 && value.size() <= maxLength;
+    }
+
+    function isOptionalString(data, field, maxLength) {
+      return !(field in data) || data[field] == null || isNonEmptyString(data[field], maxLength);
+    }
+
+    function isValidAmount(value) {
+      return value is number && value >= 0 && value <= 1000000000;
+    }
+
+    function isValidYearMonth(value) {
+      return value is string && value.matches('^[0-9]{4}-[0-9]{2}$');
+    }
+
+    function isValidIsoLike(value) {
+      return value is string && value.size() >= 10 && value.size() <= 40;
+    }
+
+    function validBudget(value) {
+      return value is map
+        && value.keys().hasOnly(['id', 'yearMonth', 'totalBudget', 'categoryBudgets'])
+        && value.keys().hasAll(['id', 'yearMonth', 'totalBudget', 'categoryBudgets'])
+        && isNonEmptyString(value.id, 160)
+        && isValidYearMonth(value.yearMonth)
+        && isValidAmount(value.totalBudget)
+        && value.categoryBudgets is list
+        && value.categoryBudgets.size() <= 50;
+    }
+
+    function validSettings(value) {
+      return value is map
+        && value.keys().hasOnly(['themeColor', 'darkMode', 'partnerNotifications', 'defaultSplitType', 'defaultSplitRatio', 'currency'])
+        && value.keys().hasAll(['themeColor', 'darkMode', 'partnerNotifications', 'defaultSplitType', 'defaultSplitRatio', 'currency'])
+        && value.themeColor in ['pink', 'coral', 'lavender', 'blue', 'mint']
+        && value.darkMode is bool
+        && value.partnerNotifications is bool
+        && value.defaultSplitType in ['half', 'ratio']
+        && value.defaultSplitRatio is list
+        && value.defaultSplitRatio.size() == 2
+        && isNonEmptyString(value.currency, 8);
+    }
+
+    function validGroupCreate() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['ownerId', 'inviteCode', 'createdAt', 'updatedAt', 'budget', 'settings'])
+        && data.keys().hasAll(['ownerId', 'inviteCode', 'createdAt', 'updatedAt', 'budget', 'settings'])
+        && data.ownerId == request.auth.uid
+        && isNonEmptyString(data.inviteCode, 160)
+        && validBudget(data.budget)
+        && validSettings(data.settings);
+    }
+
+    function validGroupUpdate() {
+      let data = request.resource.data;
+      return (!('budget' in data) || validBudget(data.budget))
+        && (!('settings' in data) || validSettings(data.settings))
+        && (!('inviteCode' in data) || isNonEmptyString(data.inviteCode, 160));
+    }
+
+    function validSplit(value) {
+      return value is map
+        && value.keys().hasOnly(['splitType', 'myAmount', 'partnerAmount', 'ratio', 'shares', 'ratios'])
+        && value.keys().hasAll(['splitType', 'myAmount', 'partnerAmount'])
+        && value.splitType in ['half', 'ratio', 'mine', 'partner', 'none']
+        && isValidAmount(value.myAmount)
+        && isValidAmount(value.partnerAmount)
+        && (!('ratio' in value) || (value.ratio is list && value.ratio.size() == 2))
+        && (!('shares' in value) || value.shares is map)
+        && (!('ratios' in value) || value.ratios is map);
+    }
+
+    function validMember(uid) {
+      let data = request.resource.data;
+      return data.keys().hasOnly([
+          'id',
+          'uid',
+          'email',
+          'name',
+          'avatarLetter',
+          'tone',
+          'role',
+          'permission',
+          'anniversaryDate',
+          'joinedAt',
+          'inviteCode'
+        ])
+        && data.keys().hasAll(['id', 'name', 'avatarLetter', 'tone', 'role'])
+        && data.id == uid
+        && (!('uid' in data) || data.uid == uid)
+        && isNonEmptyString(data.name, 60)
+        && isNonEmptyString(data.avatarLetter, 4)
+        && data.tone in ['accent', 'accent2']
+        && data.role in ['me', 'partner', 'member']
+        && (!('permission' in data) || data.permission in ['owner', 'member'])
+        && isOptionalString(data, 'email', 160)
+        && isOptionalString(data, 'anniversaryDate', 40)
+        && isOptionalString(data, 'joinedAt', 40);
+    }
+
+    function validTransaction(groupId) {
+      let data = request.resource.data;
+      return data.keys().hasOnly([
+          'id',
+          'type',
+          'amount',
+          'title',
+          'categoryId',
+          'date',
+          'paidBy',
+          'walletType',
+          'split',
+          'memo',
+          'paymentMethodId',
+          'paymentMethodName',
+          'receiptImageUrl',
+          'tags',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasAll(['id', 'type', 'amount', 'title', 'categoryId', 'date', 'paidBy', 'walletType', 'split', 'createdAt', 'updatedAt'])
+        && isNonEmptyString(data.id, 160)
+        && data.type in ['expense', 'income', 'transfer']
+        && isValidAmount(data.amount)
+        && isNonEmptyString(data.title, 120)
+        && isNonEmptyString(data.categoryId, 60)
+        && isValidIsoLike(data.date)
+        && exists(memberRef(groupId, data.paidBy))
+        && data.walletType in ['shared', 'personal']
+        && validSplit(data.split)
+        && isValidIsoLike(data.createdAt)
+        && isValidIsoLike(data.updatedAt)
+        && isOptionalString(data, 'memo', 500)
+        && isOptionalString(data, 'paymentMethodId', 160)
+        && isOptionalString(data, 'paymentMethodName', 80)
+        && isOptionalString(data, 'receiptImageUrl', 1000)
+        && (!('tags' in data) || (data.tags is list && data.tags.size() <= 20));
+    }
+
+    function validGoal() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['id', 'title', 'emoji', 'targetAmount', 'savedAmount', 'targetDate', 'owner', 'createdAt'])
+        && data.keys().hasAll(['id', 'title', 'emoji', 'targetAmount', 'savedAmount', 'owner', 'createdAt'])
+        && isNonEmptyString(data.id, 160)
+        && isNonEmptyString(data.title, 120)
+        && isNonEmptyString(data.emoji, 12)
+        && isValidAmount(data.targetAmount)
+        && isValidAmount(data.savedAmount)
+        && data.savedAmount <= data.targetAmount
+        && data.owner in ['couple', 'me', 'partner']
+        && isValidIsoLike(data.createdAt)
+        && isOptionalString(data, 'targetDate', 40);
+    }
+
+    function validSettlement(groupId) {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['id', 'yearMonth', 'fromUserId', 'toUserId', 'amount', 'status', 'transactionIds', 'completedAt'])
+        && data.keys().hasAll(['id', 'yearMonth', 'fromUserId', 'toUserId', 'amount', 'status', 'transactionIds'])
+        && isNonEmptyString(data.id, 160)
+        && isValidYearMonth(data.yearMonth)
+        && exists(memberRef(groupId, data.fromUserId))
+        && exists(memberRef(groupId, data.toUserId))
+        && data.fromUserId != data.toUserId
+        && isValidAmount(data.amount)
+        && data.status in ['pending', 'completed']
+        && data.transactionIds is list
+        && data.transactionIds.size() <= 300
+        && isOptionalString(data, 'completedAt', 40);
+    }
+
+    match /groups/{groupId} {
+      allow create: if signedIn()
+        && validGroupCreate();
+
+      allow read: if isMember(groupId);
+
+      allow update: if isMember(groupId)
+        && request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['budget', 'settings', 'inviteCode', 'updatedAt'])
+        && validGroupUpdate()
+        && (
+          isOwner(groupId)
+          || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['budget', 'settings', 'updatedAt'])
+        );
+
+      allow delete: if isOwner(groupId);
+
+      match /members/{uid} {
+        allow read: if isMember(groupId);
+
+        allow create: if signedIn()
+          && uid == request.auth.uid
+          && validMember(uid)
+          && (
+            get(groupRef(groupId)).data.ownerId == request.auth.uid
+            || request.resource.data.inviteCode == get(groupRef(groupId)).data.inviteCode
+          );
+
+        allow update: if isMember(groupId)
+          && validMember(uid)
+          && (
+            uid == request.auth.uid
+            || isOwner(groupId)
+          );
+
+        allow delete: if isMember(groupId)
+          && (
+            uid == request.auth.uid
+            || isOwner(groupId)
+          );
+      }
+
+      match /transactions/{transactionId} {
+        allow read: if isMember(groupId);
+        allow create, update: if isMember(groupId)
+          && request.resource.data.id == transactionId
+          && validTransaction(groupId);
+        allow delete: if isMember(groupId);
+      }
+
+      match /goals/{goalId} {
+        allow read: if isMember(groupId);
+        allow create, update: if isMember(groupId)
+          && request.resource.data.id == goalId
+          && validGoal();
+        allow delete: if isMember(groupId);
+      }
+
+      match /settlements/{settlementId} {
+        allow read: if isMember(groupId);
+        allow create, update: if isMember(groupId)
+          && request.resource.data.id == settlementId
+          && validSettlement(groupId);
+        allow delete: if isMember(groupId);
+      }
+    }
+  }
+}

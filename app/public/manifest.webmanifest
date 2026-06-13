@@ -1,0 +1,18 @@
+{
+  "name": "우리 둘의 가계부",
+  "short_name": "커플가계부",
+  "description": "커플이 함께 지출, 예산, 정산, 목표를 기록하는 공유 가계부",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7fbff",
+  "theme_color": "#2f80ed",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

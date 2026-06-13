@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  --color-accent: #2f80ed;
+  --color-accent2: #9fd3ff;
+  --color-ink: #1f2a44;
+  --color-paper: #fbfdff;
+  --color-muted: #6b7890;
+  --color-faint: #d7e3f1;
+  --color-bg: #eef6ff;
+  --color-line: rgba(215, 227, 241, 0.72);
+  --shadow-soft: 0 10px 28px rgba(31, 42, 68, 0.08);
+  --shadow-card: 0 14px 34px rgba(31, 42, 68, 0.11);
+  --shadow-button: 0 8px 18px rgba(47, 128, 237, 0.24);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Noto Sans KR', system-ui, sans-serif;
+  background: #d9e8f7;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+#root {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  background: var(--color-paper);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#root .rounded-2xl {
+  box-shadow: var(--shadow-soft);
+}
+
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
