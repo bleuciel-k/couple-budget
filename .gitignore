@@ -49,3 +49,6 @@ app/android/app/src/main/assets/capacitor.plugins.json
 app/android/app/src/main/res/xml/config.xml
 app/ios/App/App/capacitor.config.json
 app/ios/App/App/config.xml
+
+# Local agent settings
+.claude/

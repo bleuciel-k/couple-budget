@@ -2,17 +2,48 @@
 @import "tailwindcss";
 
 :root {
-  --color-accent: #2f80ed;
-  --color-accent2: #9fd3ff;
+  /* 밝은 청록색 (민트) */
+  --color-accent: #00B8A9;
+  --color-accent2: #7CE8DB;
+  --color-accent-soft: rgba(0, 184, 169, 0.12);
   --color-ink: #1f2a44;
-  --color-paper: #fbfdff;
-  --color-muted: #6b7890;
-  --color-faint: #d7e3f1;
-  --color-bg: #eef6ff;
-  --color-line: rgba(215, 227, 241, 0.72);
+  --color-paper: #fcfefe;
+  --color-muted: #5e7285;
+  --color-faint: #d4f3ec;
+  --color-bg: #f0fbf9;
+  --color-line: rgba(180, 226, 218, 0.72);
+
+  /* 긍정적인 것 (+) : 밝은 초록색 */
+  --color-positive: #10B981;
+  --color-positive-soft: rgba(16, 185, 129, 0.12);
+  --shadow-positive: 0 8px 18px rgba(16, 185, 129, 0.32);
+
+  /* 부정적인 부분 (- 지출 등) : 자몽(내부) 색 */
+  --color-grapefruit: #FF5C5C;
+  --color-grapefruit-soft: rgba(255, 92, 92, 0.12);
+  --shadow-grapefruit: 0 8px 18px rgba(255, 92, 92, 0.32);
+
+  /* "나"의 지출 전용 테마 (인디고/바이올렛) */
+  --color-theme-me: #6366F1;
+  --color-theme-me-soft: rgba(99, 102, 241, 0.10);
+  --color-theme-me-line: rgba(99, 102, 241, 0.25);
+  --shadow-theme-me: 0 8px 18px rgba(99, 102, 241, 0.28);
+
+  /* "둘이 함께 지출" 전용 테마 (민트색 / 밝은 청록색) */
+  --color-theme-together: #00B8A9;
+  --color-theme-together-soft: rgba(0, 184, 169, 0.12);
+  --color-theme-together-line: rgba(0, 184, 169, 0.30);
+  --shadow-theme-together: 0 8px 18px rgba(0, 184, 169, 0.28);
+
   --shadow-soft: 0 10px 28px rgba(31, 42, 68, 0.08);
   --shadow-card: 0 14px 34px rgba(31, 42, 68, 0.11);
-  --shadow-button: 0 8px 18px rgba(47, 128, 237, 0.24);
+  --shadow-button: 0 8px 18px rgba(0, 184, 169, 0.28);
+
+  /* Safe Area Variables with fallback */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
 }
 
 * {
@@ -20,29 +51,161 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+html {
+  height: 100%;
+  height: 100dvh;
+}
+
 body {
-  font-family: 'Noto Sans KR', system-ui, sans-serif;
-  background: #d9e8f7;
+  font-family: 'Noto Sans KR', system-ui, -apple-system, sans-serif;
+  background: #d8f5ee;
   margin: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 #root {
   width: 100%;
-  max-width: 430px;
-  min-height: 100vh;
+  max-width: 440px;
+  height: 100vh;
+  height: 100dvh;
   background: var(--color-paper);
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 16px 48px rgba(0, 184, 169, 0.16), 0 4px 16px rgba(31, 42, 68, 0.08);
+}
+
+/* 휴대폰 해상도에 맞춤 자동 적응 (모바일 기기 및 480px 이하 화면) */
+@media (max-width: 480px) {
+  body {
+    background: var(--color-paper);
+    display: block;
+  }
+  #root {
+    width: 100vw;
+    max-width: 100vw;
+    min-width: 100%;
+    height: 100dvh;
+    border-radius: 0 !important;
+    box-shadow: none;
+    border: none !important;
+  }
+}
+
+/* 데스크탑 및 태블릿 환경: 감성적인 스마트폰 목업 프레임 */
+@media (min-width: 481px) {
+  #root {
+    height: min(94dvh, 880px);
+    border-radius: 36px;
+    border: 7px solid rgba(255, 255, 255, 0.88);
+  }
 }
 
 #root .rounded-2xl {
+  border-radius: 1.25rem;
   box-shadow: var(--shadow-soft);
+}
+
+#root .rounded-xl {
+  border-radius: 1rem;
+}
+
+/* 부드러운 버튼 상호작용 애니메이션 */
+button,
+[role="button"],
+a {
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.25, 1),
+              box-shadow 0.2s ease,
+              background-color 0.2s ease,
+              border-color 0.2s ease,
+              color 0.18s ease,
+              opacity 0.18s ease,
+              filter 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+button:active:not(:disabled),
+[role="button"]:active:not([aria-disabled="true"]) {
+  transform: scale(0.96);
+  filter: brightness(0.97);
+  transition-duration: 0.08s;
+}
+
+/* 화면 전환 애니메이션 (스크린 및 탭 이동 시) */
+@keyframes screenEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0.7;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.screen-transition {
+  animation: screenEnter 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 부드러운 스크롤 설정 및 웹 브라우저 마우스 휠 대응 */
+.overflow-y-auto {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+@media (min-width: 481px) {
+  .overflow-y-auto {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 184, 169, 0.35) transparent;
+  }
+  .overflow-y-auto::-webkit-scrollbar {
+    display: block;
+    width: 6px;
+  }
+  .overflow-y-auto::-webkit-scrollbar-thumb {
+    background: rgba(0, 184, 169, 0.35);
+    border-radius: 9999px;
+  }
+  .overflow-y-auto::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
 
 * {

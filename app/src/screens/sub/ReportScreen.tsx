@@ -66,7 +66,7 @@ function MonthPickerButton({
         onClick={openPicker}
         className="h-10 w-10 rounded-full grid place-items-center transition-all active:scale-95"
         style={{
-          background: 'rgba(47,128,237,0.1)',
+          background: 'var(--color-accent-soft)',
           border: '1px solid var(--color-line)',
           boxShadow: 'var(--shadow-soft)',
         }}
@@ -169,8 +169,8 @@ function ReportTab({ transactions, yearMonth }: { transactions: Transaction[]; y
     <div className="flex flex-col gap-4 px-4 py-4">
       {/* Headline */}
       <div
-        className="rounded-2xl p-4"
-        style={{ border: '1px solid var(--color-line)', background: 'rgba(47,128,237,0.12)' }}
+        className="rounded-3xl p-4"
+        style={{ border: '1px solid var(--color-line)', background: 'var(--color-accent-soft)' }}
       >
         <div className="text-xs font-mono" style={{ color: 'var(--color-muted)' }}>
           {reportMonth}월 함께 쓴 돈
@@ -519,16 +519,16 @@ function BudgetTab({ transactions, yearMonth }: { transactions: Transaction[]; y
     <div className="flex flex-col gap-4 px-4 py-4">
       {/* Total Budget Card */}
       <div
-        className="rounded-2xl p-4"
-        style={{ border: '1px solid var(--color-line)', background: 'rgba(47,128,237,0.12)' }}
+        className="rounded-3xl p-4"
+        style={{ border: '1px solid var(--color-line)', background: 'var(--color-accent-soft)' }}
       >
         <div className="flex justify-between items-center mb-2">
           <span className="font-semibold">{Number(yearMonth.split('-')[1])}월 총 예산</span>
           <span
-            className="text-xs px-2 py-0.5 rounded-full font-medium"
+            className="text-xs px-2.5 py-0.5 rounded-full font-semibold"
             style={{
-              background: totalPct > 90 ? 'var(--color-accent)' : 'rgba(159,211,255,0.2)',
-              color: totalPct > 90 ? '#fff' : '#1677c9',
+              background: totalPct > 90 ? 'var(--color-grapefruit)' : 'var(--color-paper)',
+              color: totalPct > 90 ? '#fff' : 'var(--color-accent)',
               border: '1px solid var(--color-line)',
             }}
           >
@@ -546,7 +546,7 @@ function BudgetTab({ transactions, yearMonth }: { transactions: Transaction[]; y
         </div>
         <div className="flex justify-between mt-2 text-xs font-mono">
           <span style={{ color: 'var(--color-muted)' }}>{getRemainingDaysText(yearMonth)}</span>
-          <span style={{ color: remaining > 0 ? '#1677c9' : 'var(--color-accent)' }}>
+          <span style={{ color: remaining > 0 ? 'var(--color-accent)' : 'var(--color-grapefruit)' }}>
             남은 금액 {formatKRW(remaining)}
           </span>
         </div>

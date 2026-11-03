@@ -145,7 +145,7 @@ function AppContent() {
   const hideTabBar = HIDE_TABBAR_PATHS.some((p) => pathname.startsWith(p));
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-full w-full overflow-hidden">
       <AuthStateGate />
       <OnboardingGate />
       <FirebaseSyncGate />

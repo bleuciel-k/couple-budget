@@ -62,13 +62,13 @@ function GoalCard({
 
   return (
     <div
-      className="rounded-2xl p-4"
+      className="rounded-3xl p-4"
       style={{
         border: '1px solid var(--color-line)',
         background: done
-          ? 'rgba(159,211,255,0.2)'
+          ? 'var(--color-accent-soft)'
           : goal.owner === 'me'
-          ? 'rgba(47,128,237,0.12)'
+          ? 'var(--color-theme-me-soft)'
           : 'var(--color-paper)',
       }}
     >
@@ -89,8 +89,8 @@ function GoalCard({
             <span className="font-semibold truncate">{goal.title}</span>
             {done && (
               <span
-                className="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
-                style={{ background: '#1677c9', color: '#fff', fontSize: 10 }}
+                className="text-xs px-2.5 py-0.5 rounded-full flex-shrink-0 font-semibold"
+                style={{ background: 'var(--color-accent)', color: '#fff', fontSize: 11 }}
               >
                 완료!
               </span>
@@ -152,9 +152,9 @@ function GoalCard({
       {!done && (
         <button
           onClick={() => onDeposit(goal)}
-          className="mt-3 w-full py-2 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95"
+          className="mt-3 w-full py-2.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-95"
           style={{
-            background: 'rgba(47,128,237,0.12)',
+            background: 'var(--color-accent-soft)',
             border: '1px solid var(--color-line)',
             color: 'var(--color-ink)',
           }}
@@ -245,8 +245,8 @@ function DepositModal({
           />
         </div>
 
-        <Button variant="filled" className="w-full" onClick={handleDeposit}>
-          저장하기
+        <Button variant="filled" tone="positive" className="w-full" onClick={handleDeposit}>
+          + 입금 저장하기
         </Button>
       </div>
     </div>
@@ -323,7 +323,7 @@ function AddGoalSheet({ onClose }: { onClose: () => void }) {
                     className="w-10 h-10 rounded-xl text-xl flex items-center justify-center"
                     style={{
                       border: '1px solid var(--color-line)',
-                      background: emoji === e ? 'rgba(47,128,237,0.12)' : 'transparent',
+                      background: emoji === e ? 'var(--color-accent-soft)' : 'transparent',
                     }}
                   >
                     {e}
@@ -387,7 +387,7 @@ function AddGoalSheet({ onClose }: { onClose: () => void }) {
                   className="w-full py-2.5 rounded-xl text-sm font-medium text-left px-3 transition-all"
                   style={{
                     border: '1px solid var(--color-line)',
-                    background: owner === o.id ? 'rgba(47,128,237,0.12)' : 'transparent',
+                    background: owner === o.id ? 'var(--color-accent-soft)' : 'transparent',
                     boxShadow: owner === o.id ? 'var(--shadow-button)' : 'none',
                   }}
                 >
@@ -399,10 +399,11 @@ function AddGoalSheet({ onClose }: { onClose: () => void }) {
 
           <Button
             variant="filled"
+            tone="positive"
             onClick={handleSave}
             className="w-full"
           >
-            목표 만들기
+            + 새 목표 만들기
           </Button>
         </div>
       </div>
@@ -478,8 +479,8 @@ function GoalDetailSheet({
 
           {/* Stats row */}
           <div
-            className="rounded-xl px-4 py-3 flex gap-4"
-            style={{ border: '1px solid var(--color-line)', background: 'rgba(47,128,237,0.12)' }}
+            className="rounded-2xl px-4 py-3 flex gap-4"
+            style={{ border: '1px solid var(--color-line)', background: 'var(--color-accent-soft)' }}
           >
             <div className="flex-1 text-center">
               <div className="text-xs font-mono" style={{ color: 'var(--color-muted)' }}>남은 금액</div>
@@ -513,8 +514,12 @@ function GoalDetailSheet({
                 deleteGoal(goal.id);
                 onClose();
               }}
-              className="flex-1 py-2.5 rounded-xl text-sm font-medium"
-              style={{ border: '1px solid var(--color-line)', color: 'var(--color-muted)' }}
+              className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all active:scale-95"
+              style={{
+                border: '1px solid var(--color-grapefruit)',
+                color: 'var(--color-grapefruit)',
+                background: 'var(--color-grapefruit-soft)',
+              }}
             >
               삭제
             </button>
@@ -532,13 +537,13 @@ function GoalDetailSheet({
               onClick={() => { onClose(); onDeposit(goal); }}
               className="flex-2 py-2.5 rounded-xl text-sm font-semibold flex-1 transition-all active:scale-95"
               style={{
-                background: 'var(--color-accent)',
-                border: '1px solid var(--color-line)',
-                boxShadow: 'var(--shadow-button)',
+                background: 'var(--color-positive)',
+                border: '1px solid var(--color-positive)',
+                boxShadow: 'var(--shadow-positive)',
                 color: '#fff',
               }}
             >
-              💰 입금하기
+              + 입금하기
             </button>
           </div>
         </div>
@@ -582,8 +587,13 @@ export function GoalsScreen() {
         <TopBar
           title="함께 모아요"
           right={
-            <button onClick={() => setShowAdd(true)}>
-              <Plus size={20} color="var(--color-ink)" />
+            <button
+              onClick={() => setShowAdd(true)}
+              className="w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-95"
+              style={{ background: 'var(--color-positive-soft)' }}
+              aria-label="목표 추가"
+            >
+              <Plus size={20} color="var(--color-positive)" strokeWidth={2.5} />
             </button>
           }
         />
@@ -591,8 +601,8 @@ export function GoalsScreen() {
         <div className="px-4 pt-4 flex flex-col gap-4">
           {/* Summary Card */}
           <div
-            className="rounded-2xl px-4 py-4"
-            style={{ border: '1px solid var(--color-line)', background: 'rgba(47,128,237,0.12)' }}
+            className="rounded-3xl px-4 py-4"
+            style={{ border: '1px solid var(--color-line)', background: 'var(--color-accent-soft)' }}
           >
             <div className="flex items-end justify-between mb-2">
               <div>
@@ -661,10 +671,15 @@ export function GoalsScreen() {
           <button
             onClick={() => setShowAdd(true)}
             className="rounded-2xl p-4 text-center w-full transition-all active:scale-95"
-            style={{ border: '1px dashed var(--color-line)', background: 'var(--color-paper)' }}
+            style={{ border: '1px dashed var(--color-positive)', background: 'var(--color-positive-soft)' }}
           >
-            <Plus size={20} className="mx-auto mb-1" color="var(--color-ink)" />
-            <div className="text-sm font-medium">새 목표 만들기</div>
+            <div
+              className="w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-1.5"
+              style={{ background: 'var(--color-positive)', boxShadow: 'var(--shadow-positive)' }}
+            >
+              <Plus size={20} color="#fff" strokeWidth={2.5} />
+            </div>
+            <div className="text-sm font-semibold" style={{ color: 'var(--color-ink)' }}>새 목표 만들기</div>
             <div className="text-xs font-mono" style={{ color: 'var(--color-muted)' }}>
               혼자 / 함께
             </div>

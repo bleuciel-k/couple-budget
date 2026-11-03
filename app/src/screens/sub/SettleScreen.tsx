@@ -56,7 +56,7 @@ function SettleRow({
       <div className="text-right flex-shrink-0">
         <div
           className="text-sm font-bold"
-          style={{ color: isPositive ? 'var(--color-accent)' : '#1677c9' }}
+          style={{ color: isPositive ? 'var(--color-positive)' : 'var(--color-grapefruit)' }}
         >
           {isPositive ? '+' : ''}{formatKRW(oweDelta)}
         </div>
@@ -76,7 +76,7 @@ function SettledCard({ owes, owed, abs }: { owes: typeof me; owed: typeof me; ab
     <div className="flex flex-col items-center gap-4 py-8 px-4">
       <div
         className="w-16 h-16 rounded-full flex items-center justify-center"
-        style={{ background: '#1677c9', border: '1px solid var(--color-line)', boxShadow: 'var(--shadow-button)' }}
+        style={{ background: 'var(--color-positive)', border: '1px solid var(--color-line)', boxShadow: 'var(--shadow-positive)' }}
       >
         <Check size={32} color="#fff" strokeWidth={3} />
       </div>
@@ -120,7 +120,7 @@ export function SettleScreen() {
   const navigate = useNavigate();
   const { transactions, settlements, addSettlement, users } = useStore();
   const activeYearMonth = getActiveYearMonth(transactions);
-  const { rows, netAmount, abs, owes, owed } = useMemo(
+  const { rows, abs, owes, owed } = useMemo(
     () => calculateSettlement(transactions, activeYearMonth, users),
     [transactions, activeYearMonth, users]
   );
@@ -185,8 +185,8 @@ export function SettleScreen() {
               </div>
             ) : (
               <div
-                className="rounded-2xl pt-5 pb-4 px-4 text-center"
-                style={{ border: '1px solid var(--color-line)', background: 'rgba(47,128,237,0.12)' }}
+                className="rounded-3xl pt-5 pb-4 px-4 text-center"
+                style={{ border: '1px solid var(--color-line)', background: 'var(--color-accent-soft)' }}
               >
                 <span className="text-xs font-mono" style={{ color: 'var(--color-muted)' }}>
                   이번 달 정산
@@ -209,7 +209,7 @@ export function SettleScreen() {
             {/* Arrow visualization */}
             {!isZero && (
               <div
-                className="rounded-2xl py-4 px-6 flex items-center justify-center gap-3"
+                className="rounded-3xl py-4 px-6 flex items-center justify-center gap-3"
                 style={{ border: '1px solid var(--color-line)', background: 'var(--color-paper)' }}
               >
                 {/* Payer */}
@@ -241,7 +241,7 @@ export function SettleScreen() {
                   </svg>
                   <span
                     className="text-xs font-bold px-2 py-0.5 rounded-full"
-                    style={{ background: 'rgba(47,128,237,0.12)', border: '1px solid var(--color-line)', color: 'var(--color-accent)' }}
+                    style={{ background: 'var(--color-accent-soft)', border: '1px solid var(--color-line)', color: 'var(--color-accent)' }}
                   >
                     {formatKRW(abs)}
                   </span>
@@ -334,10 +334,10 @@ export function SettleScreen() {
             {/* Net summary */}
             {!isZero && (
               <div
-                className="rounded-xl px-4 py-3 flex items-center justify-between"
+                className="rounded-2xl px-4 py-3 flex items-center justify-between"
                 style={{
                   border: '1px solid var(--color-line)',
-                  background: netAmount > 0 ? 'rgba(47,128,237,0.12)' : 'rgba(159,211,255,0.2)',
+                  background: 'var(--color-accent-soft)',
                 }}
               >
                 <span className="text-sm font-medium">최종 정산금액</span>
@@ -368,9 +368,9 @@ export function SettleScreen() {
               onClick={completeSettlement}
               className="flex-[2] py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all active:scale-95"
               style={{
-                background: 'var(--color-accent)',
-                border: '1px solid var(--color-line)',
-                boxShadow: 'var(--shadow-button)',
+                background: 'var(--color-positive)',
+                border: '1px solid var(--color-positive)',
+                boxShadow: 'var(--shadow-positive)',
                 color: '#fff',
               }}
             >

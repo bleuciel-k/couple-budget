@@ -38,10 +38,10 @@ export const BUDGET: MonthlyBudget = {
 export const GOALS: Goal[] = [];
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  themeColor: 'blue',
+  themeColor: 'mint',
   darkMode: false,
   partnerNotifications: true,
-  defaultSplitType: 'half',
-  defaultSplitRatio: [5, 5],
+  defaultSplitType: 'mine',
+  defaultSplitRatio: [50, 50],
   currency: 'KRW',
 };

@@ -62,7 +62,7 @@ service cloud.firestore {
         && value.themeColor in ['pink', 'coral', 'lavender', 'blue', 'mint']
         && value.darkMode is bool
         && value.partnerNotifications is bool
-        && value.defaultSplitType in ['half', 'ratio']
+        && value.defaultSplitType in ['half', 'ratio', 'mine', 'partner', 'none']
         && value.defaultSplitRatio is list
         && value.defaultSplitRatio.size() == 2
         && isNonEmptyString(value.currency, 8);

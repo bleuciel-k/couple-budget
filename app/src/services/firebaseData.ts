@@ -401,10 +401,20 @@ export async function rotateInviteCode(groupId = activeGroupId) {
 }
 
 export async function getInviteLink(groupId = activeGroupId) {
-  if (!groupId) return '';
-  const groupSnapshot = await getDoc(doc(db, 'groups', groupId));
-  const inviteCode = (groupSnapshot.data()?.inviteCode as string | undefined) ?? (await rotateInviteCode(groupId));
-  return `${window.location.origin}/onboarding/joined?group=${encodeURIComponent(groupId)}&invite=${encodeURIComponent(inviteCode)}`;
+  const targetGroupId = groupId || activeGroupId || (auth.currentUser ? `group_${auth.currentUser.uid}` : null);
+  if (!targetGroupId) return `${window.location.origin}/onboarding`;
+  try {
+    const groupSnapshot = await getDoc(doc(db, 'groups', targetGroupId));
+    let inviteCode = groupSnapshot.data()?.inviteCode as string | undefined;
+    if (!inviteCode && auth.currentUser) {
+      inviteCode = await rotateInviteCode(targetGroupId);
+    }
+    const codeParam = inviteCode ? `&invite=${encodeURIComponent(inviteCode)}` : '';
+    return `${window.location.origin}/onboarding?group=${encodeURIComponent(targetGroupId)}${codeParam}`;
+  } catch (err) {
+    console.warn('Could not read Firestore group for invite link, using fallback', err);
+    return `${window.location.origin}/onboarding?group=${encodeURIComponent(targetGroupId)}`;
+  }
 }
 
 export function subscribeGroup(groupId: string, onChange: (payload: FirebaseGroupPayload) => void) {

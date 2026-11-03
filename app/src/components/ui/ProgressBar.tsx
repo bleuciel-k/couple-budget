@@ -11,20 +11,20 @@ export function ProgressBar({ value, color = 'accent', height = 8, showOverflow 
 
   const barColor =
     isOver && showOverflow
-      ? 'var(--color-accent)'
+      ? 'var(--color-grapefruit)'
       : color === 'accent2'
       ? 'var(--color-accent2)'
       : color === 'green'
-      ? '#4aa3ff'
+      ? 'var(--color-positive)'
       : 'var(--color-accent)';
 
   return (
     <div
-      className="w-full rounded-sm overflow-hidden"
-      style={{ height, background: 'rgba(215,227,241,0.55)' }}
+      className="w-full rounded-full overflow-hidden"
+      style={{ height, background: 'var(--color-accent-soft)' }}
     >
       <div
-        className="h-full transition-all duration-500"
+        className="h-full rounded-full transition-all duration-500"
         style={{ width: `${clamped}%`, background: barColor }}
       />
     </div>

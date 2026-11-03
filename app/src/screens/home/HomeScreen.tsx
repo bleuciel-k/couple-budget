@@ -65,6 +65,52 @@ function formatSignedAmount(t: Transaction) {
   return `${sign}${formatKRW(t.amount)}`;
 }
 
+function SignedAmount({ t, className = '' }: { t: Transaction; className?: string }) {
+  const isIncome = t.type === 'income';
+  return (
+    <span
+      className={className}
+      style={{ color: isIncome ? 'var(--color-positive)' : 'var(--color-grapefruit)' }}
+    >
+      {formatSignedAmount(t)}
+    </span>
+  );
+}
+
+function SplitBadge({ t }: { t: Transaction }) {
+  const isShared = t.walletType === 'shared' || t.split.splitType === 'half' || t.split.splitType === 'ratio';
+  if (isShared) {
+    const ratioStr =
+      t.split.splitType === 'ratio' && t.split.ratio
+        ? `${t.split.ratio[0]}:${t.split.ratio[1]}`
+        : '1/2';
+    return (
+      <span
+        className="text-[11px] px-1.5 py-0.5 rounded-full font-semibold shrink-0"
+        style={{
+          background: 'var(--color-theme-together-soft)',
+          border: '1px solid var(--color-theme-together-line)',
+          color: 'var(--color-theme-together)',
+        }}
+      >
+        👥 함께 {ratioStr}
+      </span>
+    );
+  }
+  return (
+    <span
+      className="text-[11px] px-1.5 py-0.5 rounded-full font-semibold shrink-0"
+      style={{
+        background: 'var(--color-theme-me-soft)',
+        border: '1px solid var(--color-theme-me-line)',
+        color: 'var(--color-theme-me)',
+      }}
+    >
+      👤 개인(나)
+    </span>
+  );
+}
+
 // ── Budget Strip ──────────────────────────────
 function BudgetStrip({ compact, transactions }: { compact?: boolean; transactions: Transaction[] }) {
   const { budget } = useStore();
@@ -81,20 +127,22 @@ function BudgetStrip({ compact, transactions }: { compact?: boolean; transaction
   if (compact) {
     return (
       <div
-        className="flex items-center gap-3 px-4 py-2"
-        style={{ background: 'var(--color-paper)', boxShadow: '0 10px 22px rgba(31,42,68,0.04)' }}
+        className="flex items-center gap-3 px-4 py-1.5"
+        style={{ background: 'var(--color-paper)', boxShadow: '0 4px 14px rgba(31,42,68,0.03)' }}
       >
         <div className="flex-1">
-          <div className="text-xs font-mono" style={{ color: 'var(--color-muted)' }}>
-            이번 달 함께 지출
+          <div className="text-[11px] font-mono" style={{ color: 'var(--color-muted)' }}>
+            이번 달 총 지출
           </div>
-          <div className="text-lg font-bold">-{formatKRW(totalSpent)}원</div>
+          <div className="text-base font-bold" style={{ color: 'var(--color-grapefruit)' }}>
+            -{formatKRW(totalSpent)}원
+          </div>
         </div>
         <div className="text-right">
-          <div className="text-xs font-mono" style={{ color: 'var(--color-muted)' }}>
+          <div className="text-[11px] font-mono" style={{ color: 'var(--color-muted)' }}>
             예산 남은
           </div>
-          <div className="text-lg font-semibold" style={{ color: remaining > 0 ? '#1677c9' : 'var(--color-accent)' }}>
+          <div className="text-base font-semibold" style={{ color: 'var(--color-accent)' }}>
             {formatKRW(remaining)}
           </div>
         </div>
@@ -104,24 +152,24 @@ function BudgetStrip({ compact, transactions }: { compact?: boolean; transaction
 
   return (
     <div
-      className="flex gap-2 px-4 py-3"
-      style={{ boxShadow: '0 10px 22px rgba(31,42,68,0.04)' }}
+      className="flex gap-2.5 px-4 py-1.5"
+      style={{ boxShadow: '0 4px 12px rgba(31,42,68,0.03)' }}
     >
       <div
-        className="flex-1 rounded-xl px-3 py-2"
-        style={{ border: '1px solid var(--color-line)', background: 'var(--color-paper)' }}
+        className="flex-1 rounded-2xl px-3.5 py-1.5 flex items-center justify-between"
+        style={{ border: '1px solid var(--color-line)', background: 'var(--color-positive-soft)' }}
       >
-        <div className="text-xs font-mono" style={{ color: 'var(--color-muted)' }}>수입</div>
-        <div className="text-lg font-semibold">+ {formatKRW(totalIncome)}</div>
+        <span className="text-xs font-semibold" style={{ color: 'var(--color-muted)' }}>수입</span>
+        <span className="text-sm font-bold" style={{ color: 'var(--color-positive)' }}>+ {formatKRW(totalIncome)}</span>
       </div>
       <div
-        className="flex-1 rounded-xl px-3 py-2"
-        style={{ border: '1px solid var(--color-line)', background: 'rgba(47,128,237,0.12)' }}
+        className="flex-1 rounded-2xl px-3.5 py-1.5 flex items-center justify-between"
+        style={{ border: '1px solid var(--color-line)', background: 'var(--color-grapefruit-soft)' }}
       >
-        <div className="text-xs font-mono" style={{ color: 'var(--color-muted)' }}>지출</div>
-        <div className="text-lg font-semibold" style={{ color: 'var(--color-accent)' }}>
+        <span className="text-xs font-semibold" style={{ color: 'var(--color-muted)' }}>지출</span>
+        <span className="text-sm font-bold" style={{ color: 'var(--color-grapefruit)' }}>
           - {formatKRW(totalSpent)}
-        </div>
+        </span>
       </div>
     </div>
   );
@@ -174,7 +222,10 @@ function CalendarGrid({
         {DAY_NAMES_KO.map((d, i) => (
           <div
             key={i}
-            style={{ color: i === 0 ? 'var(--color-accent)' : i === 6 ? '#2f80ed' : undefined }}
+            style={{
+              color: i === 0 ? 'var(--color-grapefruit)' : i === 6 ? 'var(--color-accent)' : undefined,
+              fontWeight: 600,
+            }}
           >
             {d}
           </div>
@@ -182,18 +233,17 @@ function CalendarGrid({
       </div>
 
       <div
-        className="grid shrink-0"
+        className="grid shrink-0 px-2 py-1 gap-y-1"
         style={{
           gridTemplateRows: 'repeat(5, 1fr)',
-          height: 'clamp(260px, 36vh, 305px)',
+          height: 'clamp(250px, 34vh, 290px)',
           borderTop: '1px solid var(--color-faint)',
         }}
       >
         {cal.map((row, ri) => (
           <div
             key={ri}
-            className="grid grid-cols-7"
-            style={{ borderBottom: '1px dotted var(--color-faint)' }}
+            className="grid grid-cols-7 gap-1"
           >
             {row.map(({ day, outOfMonth }, ci) => {
               const isSelected = day === selectedDay && !outOfMonth;
@@ -203,31 +253,38 @@ function CalendarGrid({
                 <button
                   key={ci}
                   onClick={() => !outOfMonth && onSelectDay(day)}
-                  className="px-1.5 py-1 relative text-left transition-colors"
+                  className="p-1 relative text-left transition-all duration-150 rounded-2xl flex flex-col justify-between active:scale-90"
                   style={{
-                    borderRight: ci < 6 ? '1px dotted var(--color-faint)' : 'none',
-                    opacity: outOfMonth ? 0.3 : 1,
-                    background: isSelected ? 'rgba(47,128,237,0.12)' : 'transparent',
+                    opacity: outOfMonth ? 0.25 : 1,
+                    background: isSelected ? 'var(--color-accent-soft)' : 'transparent',
+                    border: isSelected ? '1.5px solid var(--color-accent)' : '1px solid transparent',
+                    boxShadow: isSelected ? 'var(--shadow-button)' : 'none',
                   }}
                 >
                   <div
-                    className="text-sm"
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
+                      isSelected ? 'bg-[var(--color-accent)] text-white shadow-sm' : ''
+                    }`}
                     style={{
-                      color: ci === 0 ? 'var(--color-accent)' : ci === 6 ? '#2f80ed' : 'var(--color-ink)',
-                      fontWeight: isSelected ? 700 : 500,
+                      color: isSelected
+                        ? '#fff'
+                        : ci === 0
+                        ? 'var(--color-grapefruit)'
+                        : ci === 6
+                        ? 'var(--color-accent)'
+                        : 'var(--color-ink)',
                     }}
                   >
                     {day}
                   </div>
                   {!outOfMonth && dots.length > 0 && (
-                    <div className="flex gap-0.5 mt-0.5 flex-wrap">
+                    <div className="flex gap-1 mt-0.5 flex-wrap px-0.5">
                       {dots.slice(0, 3).map((o, i) => (
                         <div
                           key={i}
                           className="w-1.5 h-1.5 rounded-full"
                           style={{
-                            background: o === 'J' ? 'var(--color-accent)' : 'var(--color-accent2)',
-                            border: '0',
+                            background: o === 'N' ? 'var(--color-theme-me)' : 'var(--color-theme-together)',
                           }}
                         />
                       ))}
@@ -261,50 +318,87 @@ function DayDetail({
     return isInYearMonth(t.date, activeYearMonth) && d.getDate() === day;
   });
 
-  if (dayTxs.length === 0) return null;
-
   const dayDate = new Date(year, month - 1, day);
   const dayName = DAY_NAMES_KO[dayDate.getDay()];
 
+  if (dayTxs.length === 0) {
+    return (
+      <div
+        className="mx-3 mb-3 rounded-3xl px-3.5 py-4 text-center shrink-0"
+        style={{ border: '1px solid var(--color-line)', background: 'var(--color-paper)' }}
+      >
+        <div className="text-sm font-semibold mb-0.5">
+          {month}월 {day}일 ({dayName})
+        </div>
+        <div className="text-xs font-mono" style={{ color: 'var(--color-muted)' }}>
+          기록된 내역이 없어요
+        </div>
+      </div>
+    );
+  }
+
+  const dayTotalIncome = dayTxs
+    .filter((t) => t.type === 'income')
+    .reduce((s, t) => s + t.amount, 0);
+  const dayTotalExpense = dayTxs
+    .filter((t) => t.type === 'expense')
+    .reduce((s, t) => s + t.amount, 0);
+
   return (
     <div
-      className="mx-3 mb-3 rounded-2xl px-3 py-3"
+      className="mx-3 mb-3 rounded-3xl px-3.5 py-3 shrink-0"
       style={{ border: '1px solid var(--color-line)', background: 'var(--color-paper)' }}
     >
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-2 mb-2 pb-1.5" style={{ borderBottom: '1px dotted var(--color-faint)' }}>
         <span className="text-base font-semibold">
           {month}월 {day}일 ({dayName})
         </span>
-        <div className="flex-1" />
-        <span className="text-xs font-mono" style={{ color: 'var(--color-muted)' }}>
+        <span className="text-xs font-mono font-medium" style={{ color: 'var(--color-muted)' }}>
           {dayTxs.length}건
         </span>
+        <div className="flex-1" />
+        <div className="flex items-center gap-2 text-xs font-mono">
+          {dayTotalIncome > 0 && (
+            <span style={{ color: 'var(--color-positive)', fontWeight: 600 }}>
+              +{formatKRW(dayTotalIncome)}
+            </span>
+          )}
+          {dayTotalExpense > 0 && (
+            <span style={{ color: 'var(--color-grapefruit)', fontWeight: 600 }}>
+              -{formatKRW(dayTotalExpense)}
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className="max-h-[116px] overflow-y-auto">
-      {dayTxs.map((t, i) => {
-        const user = users.find((u) => u.id === t.paidBy) ?? users[0];
-        const cat = catMap[t.categoryId];
-        return (
-          <button
-            key={t.id}
-            onClick={() => navigate(`/add?tx=${t.id}`)}
-            className="flex items-center gap-2 py-1.5 w-full text-left"
-            style={{
-              borderBottom: i < dayTxs.length - 1 ? '1px dotted var(--color-faint)' : 'none',
-            }}
-          >
-            <Avatar letter={user.avatarLetter} tone={user.tone} size={24} />
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium truncate">{t.title}</div>
-              <div className="text-xs font-mono" style={{ color: 'var(--color-muted)' }}>
-                {cat?.emoji} {cat?.name}
+      <div className="flex flex-col gap-1">
+        {dayTxs.map((t, i) => {
+          const user = users.find((u) => u.id === t.paidBy) ?? users[0];
+          const cat = catMap[t.categoryId];
+          return (
+            <button
+              key={t.id}
+              onClick={() => navigate(`/add?tx=${t.id}`)}
+              className="flex items-center gap-2.5 py-2 px-2 rounded-2xl w-full text-left transition-colors active:scale-[0.99] hover:bg-slate-50 cursor-pointer"
+              style={{
+                borderBottom: i < dayTxs.length - 1 ? '1px dotted var(--color-faint)' : 'none',
+              }}
+            >
+              <Avatar letter={user.avatarLetter} tone={user.tone} size={26} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm font-medium truncate">{t.title}</span>
+                  <SplitBadge t={t} />
+                </div>
+                <div className="text-xs font-mono mt-0.5" style={{ color: 'var(--color-muted)' }}>
+                  {cat?.emoji} {cat?.name}
+                  {t.memo ? ` · ${t.memo}` : ''}
+                </div>
               </div>
-            </div>
-            <div className="text-sm font-semibold">{formatSignedAmount(t)}</div>
-          </button>
-        );
-      })}
+              <SignedAmount t={t} className="text-sm font-bold" />
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -327,9 +421,9 @@ function CalendarView({
 }) {
   const me = users.find((u) => u.role === 'me') ?? users[0];
   return (
-    <>
+    <div className="flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden pb-28">
       <BudgetStrip transactions={transactions} />
-      <div className="flex items-center gap-2 px-4 py-1.5">
+      <div className="flex items-center gap-2 px-4 py-1.5 shrink-0">
         <div className="flex items-center gap-1.5">
           <Avatar letter={me?.avatarLetter ?? 'N'} tone={me?.tone ?? 'accent'} size={22} />
           <span className="text-sm font-medium">
@@ -358,7 +452,7 @@ function CalendarView({
         users={users}
       />
       <DayDetail day={selectedDay} transactions={transactions} activeYearMonth={activeYearMonth} users={users} />
-    </>
+    </div>
   );
 }
 
@@ -450,7 +544,7 @@ function TimelineView({ transactions, users }: { transactions: Transaction[]; us
                 </span>
               </div>
               <div
-                className="rounded-xl overflow-hidden px-3"
+                className="rounded-3xl overflow-hidden px-3.5 py-1"
                 style={{ border: '1px solid var(--color-line)', background: 'var(--color-paper)' }}
               >
                 {txs.map((t, i) => {
@@ -461,37 +555,14 @@ function TimelineView({ transactions, users }: { transactions: Transaction[]; us
                     <button
                       key={t.id}
                       onClick={() => navigate(`/add?tx=${t.id}`)}
-                      className="flex items-center gap-3 py-3 w-full text-left"
+                      className="flex items-center gap-3 py-3 px-1 w-full text-left rounded-2xl transition-colors hover:bg-slate-50"
                       style={{ borderBottom: i < txs.length - 1 ? '1px dotted var(--color-faint)' : 'none' }}
                     >
                       <Avatar letter={user.avatarLetter} tone={user.tone} size={28} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-semibold truncate">{t.title}</span>
-                          {isShared && t.split.splitType === 'half' && (
-                            <span
-                              className="text-xs px-1.5 py-0.5 rounded-full"
-                              style={{
-                                background: 'rgba(47,128,237,0.12)',
-                                border: '1px solid var(--color-line)',
-                                color: 'var(--color-accent)',
-                              }}
-                            >
-                              1/2
-                            </span>
-                          )}
-                          {isShared && t.split.splitType !== 'half' && (
-                            <span
-                              className="text-xs px-1.5 py-0.5 rounded-full"
-                              style={{
-                                background: 'rgba(122,163,217,0.15)',
-                                border: '1px solid var(--color-line)',
-                                color: '#2f80ed',
-                              }}
-                            >
-                              공동
-                            </span>
-                          )}
+                          <SplitBadge t={t} />
                         </div>
                         <div className="text-xs font-mono mt-0.5" style={{ color: 'var(--color-muted)' }}>
                           {cat?.emoji} {cat?.name}
@@ -499,7 +570,7 @@ function TimelineView({ transactions, users }: { transactions: Transaction[]; us
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-base font-bold">{formatSignedAmount(t)}</div>
+                        <SignedAmount t={t} className="text-base font-bold" />
                         {isShared && (
                           <div className="text-xs font-mono" style={{ color: 'var(--color-muted)' }}>
                             내 몫 {formatKRW(t.split.myAmount)}
@@ -543,13 +614,17 @@ function MenuSheet({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end"
-      style={{ background: 'rgba(31,42,68,0.26)' }}
+      className="fixed inset-0 z-50 flex items-end animate-fade-in"
+      style={{ background: 'rgba(31,42,68,0.3)', backdropFilter: 'blur(3px)' }}
       onClick={onClose}
     >
       <div
-        className="w-full rounded-t-3xl px-4 pt-4 pb-8"
-        style={{ background: 'var(--color-paper)', boxShadow: '0 -18px 42px rgba(31,42,68,0.16)' }}
+        className="w-full rounded-t-3xl px-4 pt-4 animate-slide-up"
+        style={{
+          background: 'var(--color-paper)',
+          boxShadow: '0 -18px 42px rgba(31,42,68,0.16)',
+          paddingBottom: 'max(2rem, calc(env(safe-area-inset-bottom, 0px) + 1.25rem))',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center mb-3">
@@ -572,7 +647,7 @@ function MenuSheet({
                 onClose();
               }}
               className="rounded-2xl px-3 py-3 text-left"
-              style={{ background: 'rgba(47,128,237,0.08)', border: '1px solid var(--color-line)' }}
+              style={{ background: 'var(--color-accent-soft)', border: '1px solid var(--color-line)' }}
             >
               <div className="text-sm font-semibold">{item.label}</div>
               <div className="text-xs font-mono mt-1" style={{ color: 'var(--color-muted)' }}>
@@ -605,12 +680,18 @@ function SearchSheet({ transactions, users, onClose }: { transactions: Transacti
   }, [normalized, transactions]);
 
   return (
-    <div className="fixed inset-0 z-50" style={{ background: 'var(--color-paper)' }}>
-      <div className="px-4 pt-12 pb-3" style={{ boxShadow: '0 10px 24px rgba(31,42,68,0.05)' }}>
+    <div className="fixed inset-0 z-50 animate-fade-in flex flex-col" style={{ background: 'var(--color-paper)' }}>
+      <div
+        className="px-4 pb-3 shrink-0"
+        style={{
+          boxShadow: '0 10px 24px rgba(31,42,68,0.05)',
+          paddingTop: 'max(2.75rem, calc(env(safe-area-inset-top, 0px) + 0.75rem))',
+        }}
+      >
         <div className="flex items-center gap-2">
           <div
             className="flex-1 flex items-center gap-2 rounded-2xl px-3 py-2.5"
-            style={{ background: 'rgba(47,128,237,0.08)', border: '1px solid var(--color-line)' }}
+            style={{ background: 'var(--color-accent-soft)', border: '1px solid var(--color-line)' }}
           >
             <Search size={18} color="var(--color-muted)" />
             <input
@@ -646,14 +727,15 @@ function SearchSheet({ transactions, users, onClose }: { transactions: Transacti
               >
                 <Avatar letter={payer.avatarLetter} tone={payer.tone} size={30} />
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold truncate">{t.title}</div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-semibold truncate">{t.title}</span>
+                    <SplitBadge t={t} />
+                  </div>
                   <div className="text-xs font-mono mt-0.5" style={{ color: 'var(--color-muted)' }}>
                     {cat?.emoji} {cat?.name} · {new Date(t.date).toLocaleDateString('ko-KR')}
                   </div>
                 </div>
-                <div className="text-sm font-bold" style={{ color: t.type === 'income' ? '#1677c9' : 'var(--color-accent)' }}>
-                  {formatSignedAmount(t)}
-                </div>
+                <SignedAmount t={t} className="text-sm font-bold" />
               </button>
             );
           })}
@@ -692,13 +774,17 @@ function FilterSheet({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end"
-      style={{ background: 'rgba(31,42,68,0.26)' }}
+      className="fixed inset-0 z-50 flex items-end animate-fade-in"
+      style={{ background: 'rgba(31,42,68,0.3)', backdropFilter: 'blur(3px)' }}
       onClick={onClose}
     >
       <div
-        className="w-full rounded-t-3xl px-4 pt-4 pb-8"
-        style={{ background: 'var(--color-paper)', boxShadow: '0 -18px 42px rgba(31,42,68,0.16)' }}
+        className="w-full rounded-t-3xl px-4 pt-4 animate-slide-up"
+        style={{
+          background: 'var(--color-paper)',
+          boxShadow: '0 -18px 42px rgba(31,42,68,0.16)',
+          paddingBottom: 'max(2rem, calc(env(safe-area-inset-bottom, 0px) + 1.25rem))',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center mb-4">
@@ -722,7 +808,7 @@ function FilterSheet({
                 ['me', me?.name ?? '나'],
                 ['partner', '다른 멤버'],
               ].map(([value, label]) => (
-                <button key={value} className="rounded-xl py-2 text-sm font-medium" style={pillStyle(filters.payer === value)} onClick={() => set({ payer: value as PayerFilter })}>
+                <button key={value} className="rounded-2xl py-2 text-sm font-medium" style={pillStyle(filters.payer === value)} onClick={() => set({ payer: value as PayerFilter })}>
                   {label}
                 </button>
               ))}
@@ -737,7 +823,7 @@ function FilterSheet({
                 ['shared', '공동'],
                 ['personal', '개인'],
               ].map(([value, label]) => (
-                <button key={value} className="rounded-xl py-2 text-sm font-medium" style={pillStyle(filters.wallet === value)} onClick={() => set({ wallet: value as WalletFilter })}>
+                <button key={value} className="rounded-2xl py-2 text-sm font-medium" style={pillStyle(filters.wallet === value)} onClick={() => set({ wallet: value as WalletFilter })}>
                   {label}
                 </button>
               ))}
@@ -753,7 +839,7 @@ function FilterSheet({
                 ['income', '수입'],
                 ['transfer', '이체'],
               ].map(([value, label]) => (
-                <button key={value} className="rounded-xl py-2 text-sm font-medium" style={pillStyle(filters.type === value)} onClick={() => set({ type: value as TypeFilter })}>
+                <button key={value} className="rounded-2xl py-2 text-sm font-medium" style={pillStyle(filters.type === value)} onClick={() => set({ type: value as TypeFilter })}>
                   {label}
                 </button>
               ))}
@@ -763,13 +849,13 @@ function FilterSheet({
           <div>
             <div className="text-xs font-mono mb-2" style={{ color: 'var(--color-muted)' }}>카테고리</div>
             <div className="grid grid-cols-4 gap-2 max-h-40 overflow-y-auto">
-              <button className="rounded-xl py-2 text-sm font-medium" style={pillStyle(filters.categoryId === 'all')} onClick={() => set({ categoryId: 'all' })}>
+              <button className="rounded-2xl py-2 text-sm font-medium" style={pillStyle(filters.categoryId === 'all')} onClick={() => set({ categoryId: 'all' })}>
                 전체
               </button>
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat.id}
-                  className="rounded-xl py-2 text-sm font-medium"
+                  className="rounded-2xl py-2 text-sm font-medium"
                   style={pillStyle(filters.categoryId === cat.id)}
                   onClick={() => set({ categoryId: cat.id })}
                 >
@@ -783,14 +869,14 @@ function FilterSheet({
           <div className="flex gap-2 pt-1">
             <button
               onClick={onReset}
-              className="flex-1 rounded-xl py-3 text-sm font-medium"
+              className="flex-1 rounded-2xl py-3 text-sm font-medium"
               style={{ border: '1px solid var(--color-line)', color: 'var(--color-muted)' }}
             >
               초기화
             </button>
             <button
               onClick={onClose}
-              className="flex-[2] rounded-xl py-3 text-sm font-semibold text-white"
+              className="flex-[2] rounded-2xl py-3 text-sm font-semibold text-white"
               style={{ background: 'var(--color-accent)', boxShadow: 'var(--shadow-button)' }}
             >
               적용하기
@@ -898,20 +984,21 @@ export function HomeScreen() {
           const selectedDate = `${activeYearMonth}-${String(selectedDay).padStart(2, '0')}`;
           navigate(`/add?date=${selectedDate}`);
         }}
-        className="absolute flex items-center justify-center rounded-full transition-all active:scale-90"
+        className="absolute flex items-center justify-center rounded-full transition-all duration-200 active:scale-90 active:rotate-12 cursor-pointer"
         style={{
           right: 20,
-          bottom: 96,
+          bottom: 'calc(74px + max(1rem, env(safe-area-inset-bottom, 0px)))',
           width: 56,
           height: 56,
-          background: 'var(--color-accent)',
-          border: '1px solid var(--color-line)',
-          boxShadow: 'var(--shadow-button)',
+          background: 'var(--color-positive)',
+          border: '1px solid rgba(16, 185, 129, 0.4)',
+          boxShadow: 'var(--shadow-positive)',
           color: '#fff',
           zIndex: 10,
         }}
+        aria-label="내역 추가"
       >
-        <Plus size={26} strokeWidth={2.5} />
+        <Plus size={28} strokeWidth={2.8} />
       </button>
 
       {showMenu && (

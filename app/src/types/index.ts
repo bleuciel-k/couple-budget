@@ -101,7 +101,7 @@ export interface Settlement {
 
 // ─── App Settings ───────────────────────────────
 export type ThemeColor = 'pink' | 'coral' | 'lavender' | 'blue' | 'mint';
-export type DefaultSplitType = 'half' | 'ratio';
+export type DefaultSplitType = 'mine' | 'half' | 'ratio';
 
 export interface AppSettings {
   themeColor: ThemeColor;
